@@ -54,29 +54,20 @@ function set-default-env (){
 
 # Retrieve versions
 GEOS_VERSION=$(manifest_version "geos")
-GDAL_VERSION=$(manifest_version "gdal")
 PROJ_VERSION=$(manifest_version "proj")
 
 # Display some information
 echo "Using geos version: ${GEOS_VERSION}" | indent
-echo "Using gdal version: ${GDAL_VERSION}" | indent
 echo "Using proj version: ${PROJ_VERSION}" | indent
 
 # Vendor directories
 VENDORED_GEOS="vendor/geos/$GEOS_VERSION"
-VENDORED_GDAL="vendor/gdal/$GDAL_VERSION"
 VENDORED_PROJ="vendor/proj/$PROJ_VERSION"
 
 if [ ! -d $CACHE_DIR/$VENDORED_GEOS ]; then
   echo "-----> Fetching and vendoring geos"
   rm -rf "$CACHE_DIR/vendor/geos"
   download_package "geos" "${GEOS_VERSION}" "${CACHE_DIR}/${VENDORED_GEOS}"
-fi
-
-if [ ! -d $CACHE_DIR/$VENDORED_GDAL ]; then
-  echo "-----> Fetching and vendoring gdal"
-  rm -rf "$CACHE_DIR/vendor/gdal"
-  download_package "gdal" "${GDAL_VERSION}" "${CACHE_DIR}/${VENDORED_GDAL}"
 fi
 
 if [ ! -d $CACHE_DIR/$VENDORED_PROJ ]; then
@@ -87,22 +78,18 @@ fi
 
 # Copy artifacts out of cache if exists.
 mkdir -p $CACHE_DIR
-for dir in $VENDORED_GEOS $VENDORED_GDAL $VENDORED_PROJ; do
+for dir in $VENDORED_GEOS $VENDORED_PROJ; do
   mkdir -p $BUILD_DIR/$dir
   cp -r $CACHE_DIR/$dir/* $BUILD_DIR/$dir &> /dev/null || true
 done
 
 # App directories
 APP_GEOS="/app/$VENDORED_GEOS"
-APP_GDAL="/app/$VENDORED_GDAL"
 APP_PROJ="/app/$VENDORED_PROJ"
 
 # Setup environment variables
 set-env GEOS_LIBRARY_PATH "$APP_GEOS/lib"
-set-env GDAL_LIBRARY_PATH "$APP_GDAL/lib"
 set-env PROJ4_LIBRARY_PATH "$APP_PROJ/lib"
-set-env GDAL_DATA "$APP_GDAL/share/gdal"
-set-env PKG_CONFIG_PATH "$APP_GDAL/lib/pkgconfig"
 
 # Bundle workaround
 mkdir -p $BUILD_DIR/.bundle
@@ -118,25 +105,9 @@ BUNDLE_WITHOUT: development:test
 BUNDLE_DISABLE_SHARED_GEMS: '1'
 " > $BUILD_DIR/.bundle/config
 
-set-default-env LIBRARY_PATH "$APP_GEOS/lib:$APP_GDAL/lib:$APP_PROJ/lib"
-set-default-env LD_LIBRARY_PATH "$APP_GEOS/lib:$APP_GDAL/lib:$APP_PROJ/lib"
-set-default-env CPATH "$APP_GEOS/include:$APP_GDAL/include:$APP_PROJ/include"
-set-default-env CPPATH "$APP_GEOS/include:$APP_GDAL/include:$APP_PROJ/include"
-set-default-env PKG_CONFIG_PATH "$APP_GDAL/lib/pkgconfig"
-
-# For use with this heroku-buildpack-multi buildpack fork:
-# https://github.com/mojodna/heroku-buildpack-multi/tree/build-env
-echo "-----> Configuring build environment"
-
-BUILDPACK_DIR=$(cd $(dirname $0)/..; pwd)
-
-cat <<EOF > $BUILDPACK_DIR/export
-export LD_LIBRARY_PATH="\$LD_LIBRARY_PATH:$LD_LIBRARY_PATH"
-export LIBRARY_PATH="\$LIBRARY_PATH:$LIBRARY_PATH"
-export PKG_CONFIG_PATH="\$PKG_CONFIG_PATH:$PKG_CONFIG_PATH"
-export CPPPATH="\$CPPPATH:$CPPPATH"
-export CPATH="\$CPATH:$CPATH"
-export GDAL_DATA="\$GDAL_DATA:$GDAL_DATA"
-EOF
+set-default-env LIBRARY_PATH "$APP_GEOS/lib:$APP_PROJ/lib"
+set-default-env LD_LIBRARY_PATH "$APP_GEOS/lib:$APP_PROJ/lib"
+set-default-env CPATH "$APP_GEOS/include:$APP_PROJ/include"
+set-default-env CPPATH "$APP_GEOS/include:$APP_PROJ/include"
 
 echo "-----> Vendoring geo libraries done"
