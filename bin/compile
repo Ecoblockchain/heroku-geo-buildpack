@@ -102,6 +102,7 @@ set-env GEOS_LIBRARY_PATH "$APP_GEOS/lib"
 set-env GDAL_LIBRARY_PATH "$APP_GDAL/lib"
 set-env PROJ4_LIBRARY_PATH "$APP_PROJ/lib"
 set-env GDAL_DATA "$APP_GDAL/share/gdal"
+set-env PKG_CONFIG_PATH "$APP_GDAL/lib/pkgconfig"
 
 # Bundle workaround
 mkdir -p $BUILD_DIR/.bundle
@@ -110,7 +111,6 @@ if [ -f $CACHE_DIR/.bundle/config ]; then
 fi
 echo "---
 BUNDLE_BUILD__RGEO: --with-geos-dir=$BUILD_DIR/$VENDORED_GEOS --with-geos-lib=$BUILD_DIR/$VENDORED_GEOS/lib --with-proj-dir=$BUILD_DIR/$VENDORED_PROJ --with-proj-lib=$BUILD_DIR/$VENDORED_PROJ/lib
-BUNDLE_BUILD__GDAL: --with-opt-dir=$BUILD_DIR/$VENDORED_GDAL --with-opt-lib=$BUILD_DIR/$VENDORED_GDAL/lib
 BUNDLE_FROZEN: '1'
 BUNDLE_PATH: vendor/bundle
 BUNDLE_BIN: vendor/bundle/bin
@@ -121,5 +121,7 @@ BUNDLE_DISABLE_SHARED_GEMS: '1'
 set-default-env LIBRARY_PATH "$APP_GEOS/lib:$APP_GDAL/lib:$APP_PROJ/lib"
 set-default-env LD_LIBRARY_PATH "$APP_GEOS/lib:$APP_GDAL/lib:$APP_PROJ/lib"
 set-default-env CPATH "$APP_GEOS/include:$APP_GDAL/include:$APP_PROJ/include"
+set-default-env CPPATH "$APP_GEOS/include:$APP_GDAL/include:$APP_PROJ/include"
+set-default-env PKG_CONFIG_PATH "$APP_GDAL/lib/pkgconfig"
 
 echo "-----> Vendoring geo libraries done"
