@@ -124,4 +124,19 @@ set-default-env CPATH "$APP_GEOS/include:$APP_GDAL/include:$APP_PROJ/include"
 set-default-env CPPATH "$APP_GEOS/include:$APP_GDAL/include:$APP_PROJ/include"
 set-default-env PKG_CONFIG_PATH "$APP_GDAL/lib/pkgconfig"
 
+# For use with this heroku-buildpack-multi buildpack fork:
+# https://github.com/mojodna/heroku-buildpack-multi/tree/build-env
+echo "-----> Configuring build environment"
+
+BUILDPACK_DIR=$(cd $(dirname $0)/..; pwd)
+
+cat <<EOF > $BUILDPACK_DIR/export
+export LD_LIBRARY_PATH="\$LD_LIBRARY_PATH:$LD_LIBRARY_PATH"
+export LIBRARY_PATH="\$LIBRARY_PATH:$LIBRARY_PATH"
+export PKG_CONFIG_PATH="\$PKG_CONFIG_PATH:$PKG_CONFIG_PATH"
+export CPPPATH="\$CPPPATH:$CPPPATH"
+export CPATH="\$CPATH:$CPATH"
+export GDAL_DATA="\$GDAL_DATA:$GDAL_DATA"
+EOF
+
 echo "-----> Vendoring geo libraries done"
